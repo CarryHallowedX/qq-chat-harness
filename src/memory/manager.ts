@@ -235,8 +235,10 @@ export class MemoryManager {
         e.lastHitAt = now;
         e.hitCount = (e.hitCount ?? 0) + 1;
       }
-      const touched = new Set(hits.map((e) => e.scope));
-      for (const s of touched) void this.persist(s);
+      // 命中落盘必须 await：fire-and-forget 会与后续变更竞态，
+      // 迟到的旧状态写盘会复活已被删除/合并的条目（搬家后 test 步骤[6] 首次暴露）
+      const touched = [...new Set(hits.map((e) => e.scope))];
+      await Promise.all(touched.map((s) => this.persist(s)));
     }
     return hits;
   }
