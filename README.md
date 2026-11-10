@@ -33,3 +33,12 @@ M2 模式系统 + 信封 + MergeCap + ChatSanitizer / M3 思考闸门 + Humanize
 - **去重合并**：同作用域内归一化同文 → importance 取最大、tags 并集。
 - **降级（§11）**：工作区不可写 → 记忆禁用、不落盘，服务不抛错。
 - **表情收录**：仅显式收藏走 `learn`；`importImage` 负责把磁盘图片拷入 `memes/images/`。
+
+## 安装为 DSH 插件（v0.2.0 起）
+
+本包已声明 DSH 组合包（`dsh.bundle.patch`），可在宿主插件管理器直接安装：
+
+- 安装后插件以 cordis 服务 `qq-chat-harness` 挂载，配置项见 `cordis.patch.yml`（workspace / autoCapture / retrievalLimit），后续可在插件配置里改。
+- `workspace` 留空时回退到用户主目录下的 `qq-harness-workspace`。
+- 包入口是 `dist/plugin.js`（由 `scripts/build-dist.mjs` 用 Node 内置 stripTypeScriptTypes 从 `src/*.ts` 编译而来）；改动 `src` 后先 `pnpm build` 再重装/重启。
+- `src/plugin.ts` 依赖宿主提供的 `@deepseek-ai/cordis` 与 `@deepseek-ai/schemastery`（peerDependencies，由宿主解析），不参与本地 `pnpm typecheck`（tsconfig 已排除）。

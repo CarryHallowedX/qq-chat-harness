@@ -1,0 +1,7 @@
+- insert:
+    - id: qq-chat-harness
+      name: qq-chat-harness
+      config:
+        workspace: 'E:/my harness/workspace'
+        autoCapture: true
+        retrievalLimit: 8
