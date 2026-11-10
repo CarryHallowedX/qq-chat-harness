@@ -29,6 +29,8 @@ export interface ConversationConfig {
   persona: string;
   /** 输出限制规则文本框（最高级规则，仅聊天模式注入） */
   restrictionRules: string;
+  /** 单次回复字数上限（所有模式生效，默认 800） */
+  maxReplyChars: number;
   chat: ChatModeConfig;
   tool: ToolModeConfig;
   memory: MemoryConfig;
@@ -53,6 +55,7 @@ export const DEFAULT_CONFIG: QqChatHarnessConfig = {
     admins: [],
     persona: '',
     restrictionRules: '',
+    maxReplyChars: 800,
     chat: { humanize: true, maxTypingDelayMs: 3000 },
     tool: { sendThinking: false },
     memory: { enabled: true, autoCapture: true, retrievalLimit: 8 },
@@ -70,6 +73,7 @@ export function resolveConfig(input: HarnessConfigInput): QqChatHarnessConfig {
       admins: [...(c.admins ?? [])],
       persona: c.persona ?? '',
       restrictionRules: c.restrictionRules ?? '',
+      maxReplyChars: c.maxReplyChars ?? DEFAULT_CONFIG.conversation.maxReplyChars,
       chat: {
         humanize: c.chat?.humanize ?? DEFAULT_CONFIG.conversation.chat.humanize,
         maxTypingDelayMs: c.chat?.maxTypingDelayMs ?? DEFAULT_CONFIG.conversation.chat.maxTypingDelayMs,

@@ -29,6 +29,8 @@
                   
                                  
                            
+                                
+                        
                        
                        
                        
@@ -53,6 +55,7 @@ export const DEFAULT_CONFIG                      = {
     admins: [],
     persona: '',
     restrictionRules: '',
+    maxReplyChars: 800,
     chat: { humanize: true, maxTypingDelayMs: 3000 },
     tool: { sendThinking: false },
     memory: { enabled: true, autoCapture: true, retrievalLimit: 8 },
@@ -70,6 +73,7 @@ export function resolveConfig(input                    )                      {
       admins: [...(c.admins ?? [])],
       persona: c.persona ?? '',
       restrictionRules: c.restrictionRules ?? '',
+      maxReplyChars: c.maxReplyChars ?? DEFAULT_CONFIG.conversation.maxReplyChars,
       chat: {
         humanize: c.chat?.humanize ?? DEFAULT_CONFIG.conversation.chat.humanize,
         maxTypingDelayMs: c.chat?.maxTypingDelayMs ?? DEFAULT_CONFIG.conversation.chat.maxTypingDelayMs,

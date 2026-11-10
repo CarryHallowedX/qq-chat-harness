@@ -42,3 +42,11 @@ M2 模式系统 + 信封 + MergeCap + ChatSanitizer / M3 思考闸门 + Humanize
 - `workspace` 留空时回退到用户主目录下的 `qq-harness-workspace`。
 - 包入口是 `dist/plugin.js`（由 `scripts/build-dist.mjs` 用 Node 内置 stripTypeScriptTypes 从 `src/*.ts` 编译而来）；改动 `src` 后先 `pnpm build` 再重装/重启。
 - `src/plugin.ts` 依赖宿主提供的 `@deepseek-ai/cordis` 与 `@deepseek-ai/schemastery`（peerDependencies，由宿主解析），不参与本地 `pnpm typecheck`（tsconfig 已排除）。
+
+## 插件设置（v0.2.1）
+
+- `conversation.defaultMode`：聊天模式 / 工具模式（聊天模式硬性禁发思考，不受任何开关影响）。
+- `conversation.restrictionRules`：输出内容限制规则文本（最高级提示词规则，仅聊天模式注入；冲突时装傻搪塞——行为执行在 M2 管线接入）。
+- `conversation.maxReplyChars`：单次回复字数上限（1-8000，默认 800，全模式生效）。
+- `conversation.tool.sendThinking`：工具模式思考发送开关（默认 false）。
+- 设置存宿主插件配置（ConfigService），工作区只放数据（设计 §3）；默认值由 Config schema 兜底。

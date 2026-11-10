@@ -1,6 +1,6 @@
 {
   "name": "qq-chat-harness",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": true,
   "description": "QQ 机器人对话编排层插件（M2-lite：组合包外壳 + 工作区/记忆/表情包存储）",
   "type": "module",
