@@ -9,8 +9,10 @@
   },
   "scripts": {
     "build": "node scripts/build-dist.mjs",
-    "smoke": "node test/m1-smoke.ts",
-    "typecheck": "tsc --noEmit"
+    "smoke": "npm run m1 && npm run m2",
+    "typecheck": "tsc --noEmit",
+    "m1": "node test/m1-smoke.ts",
+    "m2": "node test/m2-routing-smoke.ts"
   },
   "main": "dist/plugin.js",
   "exports": {

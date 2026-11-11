@@ -24,6 +24,9 @@ const SKELETON                    = [
   'memory',
   'memory/groups',
   'memory/users',
+  'memory/blocks',
+  'memory/solo',
+  'memory/solo/sessions',
   'memes',
   'memes/images',
 ]         ;

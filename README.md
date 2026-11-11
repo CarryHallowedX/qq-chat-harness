@@ -2,13 +2,13 @@
 
 QQ 机器人对话编排层插件（设计文档：`../qq-chat-harness-设计文档.md`，v1.1 统一策略版）。
 
-**当前状态：M1 完成** —— 工作区 + 两存储区 + 记忆读写（全对话）。
-M2 模式系统 + 信封 + MergeCap + ChatSanitizer / M3 思考闸门 + Humanizer + 会话内命令 / M4 锚文本 + 装傻策略 + ruleGuard 待做。
+**当前状态：M2-lite 完成** —— M1（工作区 + 两存储区 + 记忆读写）+ agents 拦截层（记忆区块路由 / 预设绑定 / 热切换）+ 记忆区块存储。
+M2 正式管线（模式系统 + 信封 + MergeCap + ChatSanitizer）/ M3 思考闸门 + Humanizer + 会话内命令 / M4 锚文本 + 装傻策略 + ruleGuard 待做。
 
 ## 运行
 
 - 需 Node ≥ 22.6（直接跑 TypeScript，无需编译）
-- 冒烟测试：`node test/m1-smoke.ts`（或 `npm run smoke`）
+- 冒烟测试：`npm run smoke`（= m1 存储区冒烟 + m2 路由冒烟，共 43+ 断言）
 - 类型检查（可选，需自装 typescript）：`npm run typecheck`
 
 ## 结构（对应设计文档 §13）
@@ -23,6 +23,8 @@ M2 模式系统 + 信封 + MergeCap + ChatSanitizer / M3 思考闸门 + Humanize
 | `src/memory/` | §7 MemoryManager（三级作用域、打分检索、去重合并、遗忘）+ Extractor 桩 |
 | `src/memes/` | §8 MemeStore（byTag / byQuery / learn / importImage / update / remove） |
 | `src/util.ts` | 小工具（genId / clamp01 / normalizeText…） |
+| `src/agents-hook.ts` | agents 拦截层：包装 create/resume/get，按 sessionKey 路由预设、SwappableAgent 代理热切换 |
+| `src/memory/blocks.ts` | 记忆区块/预设绑定解析（通配优先→openid 首中、灰标）、SessionMemoryStore、生效表 Markdown |
 
 注：`storage.ts` `workspace.ts` `util.ts` 为实现性拆分，§13 布局之外的地基件。
 
@@ -50,3 +52,25 @@ M2 模式系统 + 信封 + MergeCap + ChatSanitizer / M3 思考闸门 + Humanize
 - `conversation.maxReplyChars`：单次回复字数上限（1-8000，默认 800，全模式生效）。
 - `conversation.tool.sendThinking`：工具模式思考发送开关（默认 false）。
 - 设置存宿主插件配置（ConfigService），工作区只放数据（设计 §3）；默认值由 Config schema 兜底。
+
+## 记忆和会话（v0.2.1，agents 拦截层）
+
+插件通过 `ctx.inject(['agents'])` 包装宿主 agents 服务的 create / resume / get（dsh-subagent 同款模式），在 dsh 与 qqbot 之间实现按会话路由：
+
+### 记忆区块（memoryBlocks）
+
+- 设置里可创建任意多个区块，成员可填「群聊」「私聊」通配或具体 openid；同区块内所有会话**记忆互通**。
+- 归属规则：**群聊/私聊通配优先**（按区块序首个命中），其次 openid 按序首中；一个 openid 只归一个区块，被遮蔽的重复项在生效表中标灰（⛔）。
+- 记忆按 session 存 JSON（`memory/blocks/<区块>/sessions/<sessionKey>.json`，无区块会话落 `memory/solo/sessions/`），全局记忆 `memory/global.json` 对所有会话可见；**非本会话的记忆只读**。
+- 每次 LLM 请求经 `system-prompt/assemble` 把检索到的区块记忆注入对话（`qq-chat-harness:memory` section，条数受 `retrievalLimit` 限制）。
+- 工作区根目录的 `记忆区块-生效表.md` 实时展示各成员生效/灰标/待定状态与会话映射，可直接查看。
+
+### 会话模式绑定（presetBindings）
+
+- 每条绑定 = 预设 id（如 `standard` / `ptc` / `minimal` / `creative`）+ 成员（同上规则）；归属某绑定的会话用该预设创建 session。
+- openid 已有 session 时**不改动原会话**：拦截层在同一 sessionId 上 dispose 旧 agent → resume 重放（热切换），失败自动回滚旧预设并在后续请求自愈重试。
+- 预设清单在插件设置描述与生效表中列出；新增预设需重启宿主刷新。
+
+### 生效表示例
+
+见工作区 `记忆区块-生效表.md`（✅ 生效 / ⏳ 待定 / ⛔ 灰）。

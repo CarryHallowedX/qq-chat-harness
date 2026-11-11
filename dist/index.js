@@ -1,9 +1,9 @@
 /**
- * qq-chat-harness 插件入口（M1）
+ * qq-chat-harness 插件入口（M1 + M2-lite 存储层）
  *
  * M1 交付：框架无关的 createHarnessServices bootstrap（工作区 + 两存储区 + 记忆读写，全对话）。
- * 接入 cordis（§13：export default 的 ctx.plugin 形态）属于 M2 与宿主联调的工作，
- * 届时服务创建逻辑保持不变，仅包一层 cordis 注入。
+ * M2-lite 新增：SessionMemoryStore（「记忆和会话」页签的会话记忆存储）与区块/绑定解析导出；
+ * 接入 cordis 的外壳在 plugin.ts（agents 拦截层 + system-prompt/assemble 记忆注入）。
  */
 import { resolveConfig } from './config.js';
                                                                     
@@ -13,6 +13,7 @@ import { initWorkspace } from './workspace.js';
 import { MemoryManager } from './memory/manager.js';
 import { noopExtractor } from './memory/extractor.js';
                                                              
+import { SessionMemoryStore } from './memory/blocks.js';
 import { MemeStore } from './memes/store.js';
 import * as conv from './conv.js';
 
@@ -22,6 +23,8 @@ import * as conv from './conv.js';
                               
                              
                         
+                                         
+                             
                    
                              
                     
@@ -42,9 +45,10 @@ export async function createHarnessServices(input                    )          
     onDegraded,
   });
   const memes = new MemeStore(store, { enabled: !workspace.degraded, onDegraded });
+  const blocks = new SessionMemoryStore(store, () => config.memoryBlocks ?? []);
   await memory.load();
   await memes.load();
-  return { config, workspace, memory, memes, extractor: noopExtractor, conv };
+  return { config, workspace, memory, blocks, memes, extractor: noopExtractor, conv };
 }
 
 export { resolveConfig, DEFAULT_CONFIG } from './config.js';
@@ -74,3 +78,27 @@ export {
   retrievalScopes,
 } from './conv.js';
                                                                    
+export {
+  WILDCARD_GROUP,
+  WILDCARD_C2C,
+  resolveMemberBlock,
+  resolvePresetBinding,
+  markMemberGroups,
+  markPresetBindings,
+  sanitizeRelPart,
+  blockDirOf,
+  SessionMemoryStore,
+  buildStatusMarkdown,
+} from './memory/blocks.js';
+             
+              
+                    
+                      
+                   
+                   
+             
+                     
+             
+                        
+                  
+                            
